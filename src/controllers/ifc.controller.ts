@@ -7,6 +7,7 @@ import {
   ResponseBuilder,
   getErrorMessage,
 } from "../utils";
+import { IfcService } from "../services/ifc";
 
 const logger = LogManager.getInstance().get(Context.IFC);
 
@@ -20,6 +21,12 @@ export class IfcController {
 
       try {
         //TODO
+        const dir = {
+          x: 0,
+          y: 0,
+          z: -1,
+        };
+        const res = await IfcService.callAllplanApi(dir, 488791.67389316217);
 
         return new ResponseBuilder<string>()
         .setData("Malacka")

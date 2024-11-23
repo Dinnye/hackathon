@@ -10,6 +10,6 @@ const router = Router();
 
 router
   //.get("/",   [validateSchema(ifcTestSchema)],      IfcController.getIfc);
-  .get("/",   IfcController.getIfc);
+  .get("/hhh",   IfcController.getIfc);
 
 export default router;
