@@ -2,6 +2,7 @@ import { Direction } from "../intefaces";
 import axios from "axios";
 import {
     AllplanToken,
+    CuttingData,
 } from "../intefaces";
 import {
   Context,
@@ -14,49 +15,76 @@ export class IfcService {
     private static BaseUrl = "https://api-stage.bimplus.net/v2/";
     private static ProjectGuid = "b43bc8a5-6f1a-4511-aa26-e727430c17bf";
 
-    public static async callAllplanApi(cuttingDirection: Direction, level: number): Promise<any| null> {
 
+    public static async generateCuttingPlans(): Promise<CuttingData[]> {
+        const data: CuttingData[] = [];
+        //TODO
         const auth = await this.authorize();
         if (auth) {
-            const http = axios.create({baseURL: this.BaseUrl});
+            const bottonLevel = 0;
+            const topLevel = 1.0;
+            const cutLevelDistances = 0.05;
 
-            const body = {
-                cuttingCalculation: {
-                    projectId: this.ProjectGuid,
-                    cuttingPlanes: [
-                        {
-                            cuttingPoint: {
-                                x: 0,
-                                y: 0,
-                                z: level,
-                            },
-                            cuttingDirection: {
-                                x: cuttingDirection.x,
-                                y: cuttingDirection.y,
-                                z: cuttingDirection.z,
-                            }
-                        }
-                    ],
-                    settings: {
-                        edges: false,
-                        edgesThickness: 5,
-                        faces: true,
-                        levelOfDetail: 100,
-                        responseGeometry: "glb"
-                    }
-                },
-                runAsync: false
+            const cuttingDirection : Direction = {
+                x: 0,
+                y: 0,
+                z: 1,
             };
 
-
-            var headers = {
-                "Content-Type" : "application/json",
-                "Authorization" : `Bearer ${auth.access_token}`,
-            };
-            const res = await http.post('/ctf-nemetschek-allplan-gmbh-ft/services/CuttingCalculation', body, {headers});
-            console.log(res);
-            //TODO
+            for (let i = 0; i < 10; i += 1) {
+                const level = bottonLevel + i * cutLevelDistances;
+                const res = await this.callAllplanApi(cuttingDirection, level, auth.access_token);
+                if (res) {
+                    data.push({level, glb: res});
+                } else {
+                    logger.error(`Failed to cut on level: ${level}`);
+                }
+            }
         }
+        return data;
+    }
+
+    private static async callAllplanApi(cuttingDirection: Direction, level: number, token: string): Promise<Buffer | null> {
+        const http = axios.create({baseURL: this.BaseUrl});
+
+        const body = {
+            cuttingCalculation: {
+                projectId: this.ProjectGuid,
+                cuttingPlanes: [
+                    {
+                        cuttingPoint: {
+                            x: 0,
+                            y: 0,
+                            z: level,
+                        },
+                        cuttingDirection: {
+                            x: cuttingDirection.x,
+                            y: cuttingDirection.y,
+                            z: cuttingDirection.z,
+                        }
+                    }
+                ],
+                settings: {
+                    edges: false,
+                    edgesThickness: 5,
+                    faces: true,
+                    levelOfDetail: 100,
+                    responseGeometry: "glb"
+                }
+            },
+            runAsync: false
+        };
+
+
+        var headers = {
+            "Content-Type" : "application/json",
+            "Authorization" : `Bearer ${token}`,
+        };
+        const res = await http.post('/ctf-nemetschek-allplan-gmbh-ft/services/CuttingCalculation', body, {headers});
+        if (res.status === 200) {
+            return res.data as Buffer;
+        }
+        return null;
     }
 
     private static async authorize(): Promise<AllplanToken | null> {

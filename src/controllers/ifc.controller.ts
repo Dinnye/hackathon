@@ -20,13 +20,7 @@ export class IfcController {
       logger.info("Hallo");
 
       try {
-        //TODO
-        const dir = {
-          x: 0,
-          y: 0,
-          z: -1,
-        };
-        const res = await IfcService.callAllplanApi(dir, 488791.67389316217);
+        const res = await IfcService.generateCuttingPlans();
 
         return new ResponseBuilder<string>()
         .setData("Malacka")

@@ -3,3 +3,8 @@ export interface Direction {
     y: number;
     z: number;
 }
+
+export interface CuttingData {
+    level: number;
+    glb: Buffer;
+}
