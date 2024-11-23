@@ -1,6 +1,9 @@
 import { Direction } from "../intefaces";
 import axios from "axios";
 import {
+    AllplanToken,
+} from "../intefaces";
+import {
   Context,
   getErrorMessage,
 } from "../utils";
@@ -13,40 +16,63 @@ export class IfcService {
 
     public static async callAllplanApi(cuttingDirection: Direction, level: number): Promise<any| null> {
 
-        const http = axios.create({
-            baseURL: this.BaseUrl,
-        });
+        const auth = await this.authorize();
+        if (auth) {
+            const http = axios.create({baseURL: this.BaseUrl});
 
-        const body = {
-            cuttingCalculation: {
-                projectId: this.ProjectGuid,
-                cuttingPlanes: [
-                    {
-                        cuttingPoint: {
-                            x: 0,
-                            y: 0,
-                            z: level,
-                        },
-                        cuttingDirection: {
-                            x: cuttingDirection.x,
-                            y: cuttingDirection.y,
-                            z: cuttingDirection.z,
+            const body = {
+                cuttingCalculation: {
+                    projectId: this.ProjectGuid,
+                    cuttingPlanes: [
+                        {
+                            cuttingPoint: {
+                                x: 0,
+                                y: 0,
+                                z: level,
+                            },
+                            cuttingDirection: {
+                                x: cuttingDirection.x,
+                                y: cuttingDirection.y,
+                                z: cuttingDirection.z,
+                            }
                         }
+                    ],
+                    settings: {
+                        edges: false,
+                        edgesThickness: 5,
+                        faces: true,
+                        levelOfDetail: 100,
+                        responseGeometry: "glb"
                     }
-                ],
-                settings: {
-                    edges: false,
-                    edgesThickness: 5,
-                    faces: true,
-                    levelOfDetail: 100,
-                    responseGeometry: "glb"
-                }
-            },
-            runAsync: false
+                },
+                runAsync: false
+            };
+
+
+            var headers = {
+                "Content-Type" : "application/json",
+                "Authorization" : `Bearer ${auth.access_token}`,
+            };
+            const res = await http.post('/ctf-nemetschek-allplan-gmbh-ft/services/CuttingCalculation', body, {headers});
+            console.log(res);
+            //TODO
+        }
+    }
+
+    private static async authorize(): Promise<AllplanToken | null> {
+        const http = axios.create({baseURL: this.BaseUrl});
+        const body = {
+            user_id : "zubair.hossain@zenesis-planung.de",
+            password : "zRWrfuTnizJH9qD" ,
+            application_id : "9CFAE2CFCB8A458796B58E963E3D251D",
         };
-
-        const res = await http.post('/ctf-nemetschek-allplan-gmbh-ft/services/CuttingCalculation', body);
-        console.log(res);
-
+        var headers = {
+            'Content-Type' : 'application/json',
+        };
+        const res = await http.post('/authorize', body, {headers});
+        if (res.status === 200) {
+            return res.data as AllplanToken;
+        }
+        return null;
     }
 }
