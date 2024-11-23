@@ -7,10 +7,11 @@
     "lint": "eslint ./src --ext .ts --ext .js",
     "lint:fix": "eslint --fix ./src --ext .ts --ext .js",
     "build": "tsc --skipLibCheck -p tsconfig.json",
-    "postbuild": "npm run copyDrawings && npm run createLogFolder",
+    "postbuild": "npm run createLogFolder",
     "start": "node --experimental-modules ./dist/index.js",
     "start:dev": "nodemon --legacy-watch",
     "start:dev:win": "npx nodemon --experimental-modules --exec \"ts-node ./src/index.ts",
+    "createLogFolder": "mkdirp logs",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
@@ -19,12 +20,14 @@
     "@types/express": "^5.0.0",
     "@types/lodash": "^4.17.13",
     "@types/node": "^22.9.3",
+    "mkdirp": "^3.0.1",
     "nodemon": "^3.1.7",
     "ts-node": "^10.9.2",
     "typescript": "^5.7.2"
   },
   "dependencies": {
     "express": "^4.21.1",
+    "joi": "^17.13.3",
     "lodash": "^4.17.21",
     "winston": "^3.17.0",
     "winston-daily-rotate-file": "^5.0.0"

@@ -10,13 +10,12 @@ import {
 
 const logger = LogManager.getInstance().get(Context.IFC);
 
-
 export class IfcController {
 
   public static async getIfc(
       request: Request,
       response: Response,
-    ): Promise<Response> {
+    ): Promise<any> {
       logger.info("Getting costs");
 
       try {
