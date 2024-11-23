@@ -9,6 +9,7 @@ import {
   getErrorMessage,
 } from "../utils";
 import { LogManager } from "../utils/logger";
+
 const logger = LogManager.getInstance().get(Context.IFC);
 
 export class IfcService {
@@ -21,9 +22,13 @@ export class IfcService {
         //TODO
         const auth = await this.authorize();
         if (auth) {
-            const bottonLevel = 0;
-            const topLevel = 1.0;
-            const cutLevelDistances = 0.05;
+//            const bottonLevel = 485800; // not yet
+//            const bottonLevel = 485801; // there is data
+//            const bottonLevel = 500699; // still have
+//            const bottonLevel = 500700; // no data
+            const bottonLevel = 485800; // still have
+            const topLevel = 500700;
+            const cutLevelDistances = 50;
 
             const cuttingDirection : Direction = {
                 x: 0,
@@ -31,11 +36,13 @@ export class IfcService {
                 z: 1,
             };
 
-            for (let i = 0; i < 10; i += 1) {
-                const level = bottonLevel + i * cutLevelDistances;
+            const fs = require('fs').promises;
+            for (let level = bottonLevel; level <= topLevel; level += cutLevelDistances) {
                 const res = await this.callAllplanApi(cuttingDirection, level, auth.access_token);
                 if (res) {
+                    console.log(res);
                     data.push({level, glb: res});
+                    await fs.writeFile('d:\\Work\\sandbox\\hackathon-data\\filename' + level + '.glb', res);
                 } else {
                     logger.error(`Failed to cut on level: ${level}`);
                 }
