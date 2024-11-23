@@ -6,5 +6,5 @@ export interface Direction {
 
 export interface CuttingData {
     level: number;
-    glb: Buffer;
+    glb: string;
 }

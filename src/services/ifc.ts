@@ -9,6 +9,7 @@ import {
   getErrorMessage,
 } from "../utils";
 import { LogManager } from "../utils/logger";
+import * as fs from "fs";
 
 const logger = LogManager.getInstance().get(Context.IFC);
 
@@ -36,13 +37,13 @@ export class IfcService {
                 z: 1,
             };
 
-            const fs = require('fs').promises;
+            //const fs = require('fs').promises;
             for (let level = bottonLevel; level <= topLevel; level += cutLevelDistances) {
                 const res = await this.callAllplanApi(cuttingDirection, level, auth.access_token);
                 if (res) {
                     console.log(res);
                     data.push({level, glb: res});
-                    await fs.writeFile('d:\\Work\\sandbox\\hackathon-data\\filename' + level + '.glb', res);
+                    //await fs.writeFile('d:\\Work\\sandbox\\hackathon-data\\floor-' + level + '.glb', res, "binary");
                 } else {
                     logger.error(`Failed to cut on level: ${level}`);
                 }
@@ -51,7 +52,7 @@ export class IfcService {
         return data;
     }
 
-    private static async callAllplanApi(cuttingDirection: Direction, level: number, token: string): Promise<Buffer | null> {
+    private static async callAllplanApi(cuttingDirection: Direction, level: number, token: string): Promise<string | null> {
         const http = axios.create({baseURL: this.BaseUrl});
 
         const body = {
@@ -87,11 +88,48 @@ export class IfcService {
             "Content-Type" : "application/json",
             "Authorization" : `Bearer ${token}`,
         };
-        const res = await http.post('/ctf-nemetschek-allplan-gmbh-ft/services/CuttingCalculation', body, {headers});
+
+
+
+        const res = await http.post('/ctf-nemetschek-allplan-gmbh-ft/services/CuttingCalculation', body, {headers, responseType: "stream"});
         if (res.status === 200) {
-            return res.data as Buffer;
+            const filePath = 'd:\\Work\\sandbox\\hackathon-data\\floor-' + level + '.glb';
+            const file: NodeJS.WritableStream = fs.createWriteStream(filePath);
+            res.data.pipe(fs.createWriteStream(filePath));
+            return new Promise((resolve, reject) => {
+                file.on("error", (err) => reject(err));
+
+                const stream = res.data.pipe(file);
+
+                stream.on("close", () => {
+                    try { resolve(filePath); } catch (err) {
+                        reject(err);
+                    }
+                });
+            });
         }
         return null;
+
+        // //const res = await http.post('/ctf-nemetschek-allplan-gmbh-ft/services/CuttingCalculation', body, {headers});
+        // //if (res.status === 200) {
+        //     //const fs = require('fs').promises;
+
+        //     const file = fs.createWriteStream('d:\\Work\\sandbox\\hackathon-data\\floor-' + level + '.glb');
+        //     const request = await http.post('/ctf-nemetschek-allplan-gmbh-ft/services/CuttingCalculation', body, {headers, responseType: "stream"}).then(res => {
+        //         res.data.pipe(file);
+
+        //         // after download completed close filestream
+        //         file.on("finish", () => {
+        //             file.close();
+        //             console.log("Download Completed");
+        //         });
+        //         });
+
+        //         fs.writeFile('d:\\Work\\sandbox\\hackathon-data\\floor-' + level + '.glb', res.data, ()=>{});
+        //     });
+        // //    return res.data as Buffer;
+        // //}
+        // return null;
     }
 
     private static async authorize(): Promise<AllplanToken | null> {
