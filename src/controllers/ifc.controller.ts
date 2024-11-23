@@ -17,7 +17,7 @@ export class IfcController {
       request: Request,
       response: Response,
     ): Promise<any> {
-      logger.info("Getting costs");
+      logger.info("Hallo");
 
       try {
         //TODO
@@ -39,7 +39,7 @@ export class IfcController {
           message: "Internal server error"} as Error,
         ]);
       } catch (error) {
-        logger.error(`CostsController getCosts: ${getErrorMessage(error)}`);
+        logger.error(`IfcController getIfc: ${getErrorMessage(error)}`);
         return errorResponse(response, statuses.server_error, [error as Error]);
       }
     }

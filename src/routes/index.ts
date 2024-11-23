@@ -3,6 +3,6 @@ import ifc from "./v1/ifc";
 
 const router = Router();
 
-router.use("/v1", ifc);
+router.use("/ifc", ifc);
 
 export default router;
