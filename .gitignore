@@ -1,0 +1,43 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Dependencies
+node_modules/
+
+# Coverage
+coverage
+
+# Transpiled files
+dist/
+
+# VS Code
+.vscode/*
+!.vscode/tasks.js
+!.vscode/launch.json
+!.vscode/settings.json
+
+# JetBrains IDEs
+.idea/
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Misc
+.DS_Store
+
+# Environment files
+.env
+
+# File storage
+file_storage/
+
+# Тemporary files for multer upload
+uploads/*
+
+# package lock json
+#package-lock.json
